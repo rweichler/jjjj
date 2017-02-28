@@ -1,3 +1,13 @@
+--add new repos here. remove the -- in front
+--to have Lua read it
+--also remember to have a / at the end or else
+--it wont work
+local REPOS = {
+    --'http://google.com/',
+    --'http://facebook.com/'
+    --etc
+    'http://ridn.me/repo/',
+}
 
 local function PUSHCONTROLLER(f, title)
     REPOCONTROLLER:pushViewController_animated(VIEWCONTROLLER(f, title), true)
@@ -21,6 +31,9 @@ _G.REPOCONTROLLER = objc.UINavigationController:alloc():initWithRootViewControll
     }
 
     Repo.List(MASTER_REPO_LIST, function(repos)
+        for _,url in ipairs(REPOS) do
+            table.insert(repos, 1, Repo:new(url))
+        end
         function tbl:search(text, item)
             local function find(s)
                 if s then
