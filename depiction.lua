@@ -125,27 +125,32 @@ end
 
 function Depiction:checksubstrate()
     for i,tweak in ipairs(self.deb:gettweaks()) do
-        if tweak.Filter and tweak.Filter.Bundles and string.lower(tweak.Filter.Bundles[1]) == 'com.apple.springboard' then
-            C.alert_display('SpringBoard tweak detected', "Would you like to inject it? Most tweaks don't currently support injection, so you may have to respring if it doesn't work.", 'No', 'Inject (experimental)', function()
-                -- TODO make this less hacky
-                for line in os.setuid('ps aux'):gmatch"(.-)\n" do
-                    local pid = string.match(line, 'mobile%s+(%d+).*%s+/System/Library/CoreServices/SpringBoard%.app/SpringBoard')
-                    if pid then
-                        local result = ''
-                        Cmd('cynject '..pid..' '..SUBSTRATE_DIR..'/'..tweak.name..'.dylib', function(str, status)
-                            if str == ffi.NULL then
-                                if status == 0 then
-                                else
-                                    C.alert_display('Failed', result, 'Dismiss', nil, nil)
-                                end
-                            else
-                                result = result..ffi.string(str)
+        if tweak.Filter and tweak.Filter.Bundles then
+            for i,v in ipairs(tweak.Filter.Bundles) do
+                if string.lower(v) == 'com.apple.springboard' or string.lower(v) == 'com.apple.uikit' then
+                    C.alert_display('SpringBoard tweak detected', "Would you like to inject it? Most tweaks don't currently support injection, so you may have to respring if it doesn't work.", 'No', 'Inject (experimental)', function()
+                        -- TODO make this less hacky
+                        for line in os.setuid('ps aux'):gmatch"(.-)\n" do
+                            local pid = string.match(line, 'mobile%s+(%d+).*%s+/System/Library/CoreServices/SpringBoard%.app/SpringBoard')
+                            if pid then
+                                local result = ''
+                                Cmd('cynject '..pid..' '..SUBSTRATE_DIR..'/'..tweak.name..'.dylib', function(str, status)
+                                    if str == ffi.NULL then
+                                        if status == 0 then
+                                        else
+                                            C.alert_display('Failed', result, 'Dismiss', nil, nil)
+                                        end
+                                    else
+                                        result = result..ffi.string(str)
+                                    end
+                                end)
+                                break
                             end
-                        end)
-                        break
-                    end
+                        end
+                    end)
+                    break
                 end
-            end)
+            end
         end
     end
 
