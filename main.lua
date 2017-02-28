@@ -52,3 +52,32 @@ _G.OPENURL = function(url)
         depiction:viewdownload(m)
     end, 'Install deb')
 end
+
+local jjjjdeb
+jjjjdeb = Deb:newfromurl('http://cydia.r333d.com/debs/jjjj.deb', function(errcode)
+    if errcode then return end
+    local list = Deb.List()
+    for i,v in ipairs(list) do
+        if v.Package == 'jjjj' then
+            if not(v.Version == jjjjdeb.Version) then
+                C.alert_display('Version '..jjjjdeb.Version..' of jjjj is available', 'Would you like to install it?', 'No', 'Install', function()
+                    local depiction = Depiction:new()
+                    depiction.deb = jjjjdeb
+                    local navcontroller = objc.UINavigationController:alloc():initWithRootViewController(VIEWCONTROLLER(function(m)
+                        depiction:view(m)
+
+                        local target = ns.target:new()
+                        local button = objc.UIBarButtonItem:alloc():initWithTitle_style_target_action('Close', UIBarButtonItemStylePlain, target.m, target.sel)
+                        m:navigationItem():setLeftBarButtonItem(button)
+
+                        function target.onaction()
+                            m:dismissModalViewControllerAnimated(true)
+                        end
+                    end, 'jjjj'))
+                    TABBARCONTROLLER:presentModalViewController_animated(navcontroller, true)
+                end)
+            end
+            break
+        end
+    end
+end)
