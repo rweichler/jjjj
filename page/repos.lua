@@ -1,11 +1,8 @@
---add new repos here. remove the -- in front
---to have Lua read it
---also remember to have a / at the end or else
+--add new repos here
+
+--remember to have a / at the end or else
 --it wont work
 local REPOS = {
-    --'http://google.com/',
-    --'http://facebook.com/'
-    --etc
     'http://ridn.me/repo/',
 }
 
