@@ -128,19 +128,23 @@ function Depiction:checksubstrate()
         if tweak.Filter and tweak.Filter.Bundles and string.lower(tweak.Filter.Bundles[1]) == 'com.apple.springboard' then
             C.alert_display('SpringBoard tweak detected', "Would you like to inject it? Most tweaks don't currently support injection, so you may have to respring if it doesn't work.", 'No', 'Inject (experimental)', function()
                 -- TODO make this less hacky
-                local ps = os.setuid('ps aux | grep SpringBoard')
-                local pid = string.match(ps, 'mobile%s+(%d+).*%s+/System/Library/CoreServices/SpringBoard%.app/SpringBoard')
-                local result = ''
-                Cmd('cynject '..pid..' '..SUBSTRATE_DIR..'/'..tweak.name..'.dylib', function(str, status)
-                    if str == ffi.NULL then
-                        if status == 0 then
-                        else
-                            C.alert_display('Failed', result, 'Dismiss', nil, nil)
-                        end
-                    else
-                        result = result..ffi.string(str)
+                for line in os.setuid('ps aux'):gmatch"(.-)\n" do
+                    local pid = string.match(line, 'mobile%s+(%d+).*%s+/System/Library/CoreServices/SpringBoard%.app/SpringBoard')
+                    if pid then
+                        local result = ''
+                        Cmd('cynject '..pid..' '..SUBSTRATE_DIR..'/'..tweak.name..'.dylib', function(str, status)
+                            if str == ffi.NULL then
+                                if status == 0 then
+                                else
+                                    C.alert_display('Failed', result, 'Dismiss', nil, nil)
+                                end
+                            else
+                                result = result..ffi.string(str)
+                            end
+                        end)
+                        break
                     end
-                end)
+                end
             end)
         end
     end
