@@ -50,7 +50,7 @@ local function import_lua_table(self, callback, ext)
 end
 
 local function last_modified_warning(self)
-    C.alert_display('Warning', 'This repo does not support the Last-Modified header. This makes listings load slower. Please notify the owner of '..self.prettyurl..' if possible.', 'Dismiss', nil, nil)
+    --C.alert_display('Warning', 'This repo does not support the Last-Modified header. This makes listings load slower. Please notify the owner of '..self.prettyurl..' if possible.', 'Dismiss', nil, nil)
 end
 
 local function doit(self, callback, info)
