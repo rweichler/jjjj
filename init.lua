@@ -90,6 +90,7 @@ require 'ui.gesture'
 ns = {}
 require 'ns.target'
 require 'ns.http'
+require 'ns.websocket'
 
 objc.class('AppDelegate', 'UIResponder')
 

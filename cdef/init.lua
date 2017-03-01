@@ -5,13 +5,14 @@ else
 end
 
 ffi.cdef[[
+struct UIEdgeInsets {
+    CGFloat top, left, bottom, right;
+};
 struct CGPoint {
-    CGFloat x;
-    CGFloat y;
+    CGFloat x, y;
 };
 struct CGSize {
-    CGFloat width;
-    CGFloat height;
+    CGFloat width, height;
 };
 struct CGRect {
     struct CGPoint origin;

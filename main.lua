@@ -53,6 +53,7 @@ _G.OPENURL = function(url)
     end, 'Install deb')
 end
 
+
 local jjjjdeb
 jjjjdeb = Deb:newfromurl('http://cydia.r333d.com/debs/jjjj.deb', function(errcode)
     if errcode then return end
