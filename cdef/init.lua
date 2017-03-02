@@ -38,6 +38,9 @@ void animateit(float duration, float delay, int options, void (*animations)(), v
 typedef void *CFNotificationCenterRef;
 void CFNotificationCenterPostNotification(CFNotificationCenterRef center, id name, const void *object, id userInfo, bool deliverImmediately);
 CFNotificationCenterRef CFNotificationCenterGetDarwinNotifyCenter(void);
+
+id UIKeyboardWillChangeFrameNotification;
+id UIKeyboardFrameEndUserInfoKey;
 ]]
 UITableViewRowAnimationFade     = 0
 UITableViewRowAnimationRight    = 1

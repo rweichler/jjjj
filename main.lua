@@ -23,8 +23,11 @@ _G.ANIMATE = function(arg1, arg2, arg3, arg4, arg5)
     local duration = 0.2
     local delay = 0
     local options = UIViewAnimationOptionCurveEaseInOut
+    local canim, ccomp
     local animations
     local completion = function(finished)
+        canim:free()
+        ccomp:free()
         return animations(finished)
     end
     if type(arg1) == 'table' then
@@ -44,7 +47,9 @@ _G.ANIMATE = function(arg1, arg2, arg3, arg4, arg5)
     else
         duration, delay, options, animations = arg1, arg2, arg3, arg4
     end
-    C.animateit(duration, delay, options, animations, completion)
+    canim = ffi.cast('void (*)()', animations)
+    ccomp = ffi.cast('void (*)(bool)', completion)
+    C.animateit(duration, delay, options, canim, ccomp)
 end
 _G.OPENURL = function(url)
     PUSHCONTROLLER(function(m)

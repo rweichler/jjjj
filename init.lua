@@ -83,6 +83,8 @@ require 'ui.cell'
 require 'ui.searchbar'
 require 'ui.button'
 require 'ui.gesture'
+require 'ui.textbox'
+require 'ui.scroll'
 
 ns = {}
 require 'ns.target'
