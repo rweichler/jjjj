@@ -19,18 +19,29 @@ function ns.http:start()
     if self.getheaders then
         request:setHTTPMethod('HEAD')
     end
-    local config = objc.NSURLSessionConfiguration:defaultSessionConfiguration()
-    local queue = objc.NSOperationQueue:mainQueue()
-    local urlSession = objc.NSURLSession:sessionWithConfiguration_delegate_delegateQueue(config, self.m, queue)
 
-    if self.download then
-        self.task = urlSession:downloadTaskWithRequest(request)
+    if not objc.NSURLSession then
+        -- iOS 6- fallback
+        if self.download and not self.downloadpath then
+            self.downloadpath = '/var/tmp/'..math.floor(math.random()*1000000)
+        end
+
+        self.connection = objc.NSURLConnection:alloc():initWithRequest_delegate(request, self.m)
+        self.connection:start()
     else
-        self.task = urlSession:dataTaskWithRequest(request)
-    end
-    self.task:resume()
+        local config = objc.NSURLSessionConfiguration:defaultSessionConfiguration()
+        local queue = objc.NSOperationQueue:mainQueue()
+        local urlSession = objc.NSURLSession:sessionWithConfiguration_delegate_delegateQueue(config, self.m, queue)
 
-    self.session = urlSession
+        if self.download then
+            self.task = urlSession:downloadTaskWithRequest(request)
+        else
+            self.task = urlSession:dataTaskWithRequest(request)
+        end
+        self.task:resume()
+
+        self.session = urlSession
+    end
 end
 
 function ns.http:parseheaders(headers)
@@ -57,6 +68,63 @@ end
 
 ns.http.class = objc.GenerateClass()
 local class = ns.http.class
+
+-- fallback for iOS 6 and lower
+
+objc.addmethod(class, 'connection:didReceiveResponse:', function(self, connection, response)
+    local this = objc.Lua(self)
+
+    this.status = tonumber(response:statusCode())
+    this:parseheaders(objc.tolua(response:allHeaderFields()))
+
+    if this.getheaders then
+        connection:cancel()
+        this:handler(nil, nil, this.status)
+        return
+    end
+
+    this.length = tonumber(this.headers['Content-Length'])
+    if this.length then
+        this.mdata = objc.NSMutableData:alloc():initWithCapacity(this.length)
+    else
+        this.mdata = objc.NSMutableData:alloc():init()
+    end
+end, ffi.arch == 'arm64' and 'v32@0:8@16@24' or 'v16@0:4@8@12')
+
+objc.addmethod(class, 'connection:didReceiveData:', function(self, connection, data)
+    local this = objc.Lua(self)
+    this.mdata:appendData(data)
+    if this.length then
+        local progress = tonumber(this.mdata:length())
+        this:handler(nil, progress/this.length)
+    end
+end, ffi.arch == 'arm64' and 'v32@0:8@16@24' or 'v16@0:4@8@12')
+
+objc.addmethod(class, 'connectionDidFinishLoading:', function(self, connection)
+    local this = objc.Lua(self)
+
+    print('finished!')
+
+    if this.status < 200 or this.status > 299 then
+        this:handler(nil, nil, status)
+        return
+    end
+
+    if this.downloadpath then
+        print('writing to '..this.downloadpath)
+        this.mdata:writeToFile_atomically(this.downloadpath, true)
+        local f = io.open(this.downloadpath, 'r')
+        if not f then
+            error('wtf?')
+        else
+            f:close()
+        end
+        this:handler(this.downloadpath)
+    else
+        print('data')
+        this:handler(this.mdata)
+    end
+end, ffi.arch == 'arm64' and 'v32@0:8@16@24' or 'v16@0:4@8@12')
 
 -- data request
 

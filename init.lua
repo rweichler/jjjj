@@ -1,7 +1,4 @@
-if jit.arch == 'arm64' then
-    -- arm64 JIT not stable
-    jit.off()
-end
+jit.off()
 
 local argc, argv = ...
 package.path = PATH..'/?.lua;'..
@@ -107,4 +104,7 @@ objc.addmethod(objc.AppDelegate, 'application:openURL:sourceApplication:annotati
     return true
 end, ffi.arch == 'arm64' and 'B48@0:8@16@24@32@40' or 'B24@0:4@8@12@16@20')
 
+DONT_RETAIN = true
+objc.NSAutoreleasePool:alloc():init() --lol who cares about memory management
+DONT_RETAIN = false
 return C.UIApplicationMain(argc, argv, nil, objc.toobj('AppDelegate'))

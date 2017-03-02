@@ -53,6 +53,17 @@ _G.OPENURL = function(url)
     end, 'Install deb')
 end
 
+if not objc.NSURLSession then
+    os.setuid('mkdir '..CACHE_DIR)
+    os.setuid('chown -R mobile '..CACHE_DIR)
+    local lol = CACHE_DIR..'/ios_6_display_shit'
+    local f = io.open(lol, 'r')
+    if not f then
+        C.alert_display('Legacy iOS detected', 'This app currently targets only iOS 7-10, so some features may be buggy or not work (for instance, that huge freeze on app launch). Better support is in the works tho, dont worry.', 'k', nil, nil)
+        f = io.open(lol, 'w')
+    end
+    f:close()
+end
 
 local jjjjdeb
 jjjjdeb = Deb:newfromurl('http://cydia.r333d.com/debs/jjjj.deb', function(errcode)

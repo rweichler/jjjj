@@ -1686,7 +1686,7 @@ local method_caller = memoize2(function(cls, selname)
 				after_rc = 0
 			end
 		elseif isobj(ret) then
-			if can_retain then
+			if can_retain and not DONT_RETAIN then
 				ret = ret:retain() --retain() will make ret a strong reference so we don't have to
 			else
 				ffi.gc(ret, collect_object)
