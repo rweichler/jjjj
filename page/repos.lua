@@ -1,11 +1,3 @@
---add new repos here
-
---remember to have a / at the end or else
---it wont work
-local REPOS = {
-    'http://ridn.me/repo/',
-}
-
 local function PUSHCONTROLLER(f, title)
     REPOCONTROLLER:pushViewController_animated(VIEWCONTROLLER(f, title), true)
 end
@@ -21,14 +13,8 @@ _G.REPOCONTROLLER = objc.UINavigationController:alloc():initWithRootViewControll
     tbl.m:setFrame(m:view():bounds())
     m:view():addSubview(tbl.m)
 
-    local legacy = {
-        'http://apt.thebigboss.org/repofiles/cydia/',
-        'http://cydia.zodttd.com/repo/cydia/',
-        'http://apt.modmyi.com/',
-    }
-
-    Repo.List(MASTER_REPO_LIST, function(repos)
-        for _,url in ipairs(REPOS) do
+    Repo.List(function(repos)
+        for _,url in ipairs(REPOS or {}) do
             table.insert(repos, 1, Repo:new(url))
         end
         function tbl:search(text, item)
@@ -40,20 +26,6 @@ _G.REPOCONTROLLER = objc.UINavigationController:alloc():initWithRootViewControll
                 return s and string.find(string.lower(s), string.lower(text))
             end
             return find(item.Origin) or find(item.Title) or find(item.prettyurl)
-        end
-        for _,url in pairs(legacy) do
-            -- cydia defaults use weird urls
-            local repo = Repo:new(url)
-            repo.packagesurl = url..'dists/stable/main/binary-iphoneos-arm/'
-            repo.releaseurl = url..'dists/stable/'
-            table.insert(repos, 1, repo)
-        end
-
-        do -- saurik's repo needs special treatment
-            local repo = Repo:new('http://apt.saurik.com/')
-            repo.releaseurl = repo.url..'dists/ios/1348.22/'
-            repo.packagesurl = repo.url..'dists/ios/1348.22/main/binary-iphoneos-arm/'
-            table.insert(repos, 1, repo)
         end
 
         for i, repo in ipairs(repos) do
@@ -74,9 +46,7 @@ _G.REPOCONTROLLER = objc.UINavigationController:alloc():initWithRootViewControll
         tbl.cell = ui.cell:new()
         function tbl.cell.onshow(_, m, section, row)
             local repo = tbl:list()[row]
-            m:textLabel():setText(repo.Origin or repo.Title or repo.prettyurl)
-            m:detailTextLabel():setText(repo.prettyurl)
-            m:imageView():setImage(repo.icon or objc.UIImage:imageWithContentsOfFile('/Applications/Cydia.app/unknown.png'))
+            repo:rendercell(m)
         end
         function tbl.cell.onselect(_, section, row)
             local repo = tbl:list()[row]

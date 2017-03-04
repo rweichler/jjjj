@@ -22,7 +22,9 @@ function ui.cell:onselect(section, row)
 end
 
 function ui.cell:mnew()
-    return objc.UITableViewCell:alloc():initWithStyle_reuseIdentifier(3, self.identifier)
+    local m = objc.UITableViewCell:alloc():initWithStyle_reuseIdentifier(3, self.identifier)
+    objc.Lua(m, {})
+    return m
 end
 
 ui.cell.class = objc.GenerateClass('UITableViewCell')

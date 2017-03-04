@@ -1,13 +1,43 @@
 local super = Object
 local Repo = Object.new(super)
 
+local weird = {}
+local legacy = {
+    packages = 'dists/stable/main/binary-iphoneos-arm/',
+    release = 'dists/stable/'
+}
+weird['http://apt.thebigboss.org/repofiles/cydia/'] = legacy
+weird['http://cydia.zodttd.com/repo/cydia/'] = legacy
+weird['http://apt.modmyi.com/'] = legacy
+weird['http://apt.saurik.com/'] = {
+    packages = 'dists/ios/1348.22/main/binary-iphoneos-arm/',
+    release = 'dists/ios/1348.22/',
+}
+
 function Repo:new(url)
     local self = super.new(self)
+    if not(string.sub(url, #url, #url) == '/') then
+        url = url..'/'
+    end
+
     self.url = url
     self.prettyurl = string.gsub(string.gsub(self.url, 'http://', ''), 'https://', '')
     self.prettyurl = string.sub(self.prettyurl, 1, #self.prettyurl - 1)
     self.cacheurl = string.gsub(self.prettyurl, '/', '-')
+
+    local w = weird[url]
+    if w then
+        self.releaseurl = self.url..w.release
+        self.packagesurl = self.url..w.packages
+    end
+
     return self
+end
+
+function Repo:rendercell(m)
+    m:textLabel():setText(self.Origin or self.Title or self.prettyurl)
+    m:detailTextLabel():setText(self.prettyurl)
+    m:imageView():setImage(self.icon or objc.UIImage:imageWithContentsOfFile('/Applications/Cydia.app/unknown.png'))
 end
 
 function Repo:getrelease(callback)
@@ -161,30 +191,24 @@ function Repo:geticon(callback)
     dl:start()
 end
 
-
-local function populate(repolist)
-    local t = {}
-    for line in (repolist.."\n"):gmatch"(.-)\n" do
-        repeat -- remove comments
-            local match = string.match(line, '(.*)#.*')
-            line = match or line
-        until not match
-
-        local url = string.match(line, 'deb%s+(.*/)%s+%.%/')
-        if url then
-            t[#t + 1] = Repo:new(url)
-        end
-    end
-    return t
-end
-
-function Repo.List(url, oncomplete)
+function Repo.List(oncomplete)
     local dl = ns.http:new()
-    dl.url = 'https://raw.githubusercontent.com/jonluca/MasterRepo/master/masterrepoeasyinstall/etc/apt/sources.list.d/MasterRepo.list'
+    dl.url = REPO_LIST_OVERRIDE or 'https://raw.githubusercontent.com/rweichler/jjjj-repos/master/init.lua'
     function dl.handler(dl, data, percent, errcode)
         if data then
-            local str = objc.NSString:alloc():initWithData_encoding(data, NSUTF8StringEncoding)
-            oncomplete(populate(objc.tolua(str)))
+            local f = load(objc.tolua(objc.NSString:alloc():initWithData_encoding(data, NSUTF8StringEncoding)))
+            local repos = f()
+            for i=1,#repos do
+                local t = type(repos[i])
+                if t == 'function' then
+                    repos[i] = repos[i]()
+                elseif t == 'string' then
+                    repos[i] = Repo:new(repos[i])
+                else
+                    error('invalid repo type?')
+                end
+            end
+            oncomplete(repos)
         elseif errcode then
             dl:start()
         end

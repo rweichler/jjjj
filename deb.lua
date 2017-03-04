@@ -47,9 +47,11 @@ function Deb:getfiles()
     if self.installed then
         cmd = 'dpkg -L '..self.Package
         regex = '(.*)'
-    else
+    elseif self.path then
         cmd = 'dpkg-deb --contents '..self.path
         regex = '.*%s+%.(/.*)'
+    else
+        return nil
     end
 
     local files = {}
@@ -184,11 +186,18 @@ function Deb.List(path)
             if deb.Package then
                 local deb = filter(deb)
                 if deb then
-                    local existing = map[deb.Package]
-                    existing = existing and t[existing]
+                    local idx = map[deb.Package]
+                    local existing = idx and t[idx]
                     if existing then
-                        existing.downgrades = existing.downgrades or {}
-                        table.insert(existing.downgrades, filter(deb))
+                        if deb.Version > existing.Version then
+                            deb.downgrades = existing.downgrades or {}
+                            existing.downgrades = nil
+                            table.insert(deb.downgrades, existing)
+                            t[idx] = deb
+                        else
+                            existing.downgrades = existing.downgrades or {}
+                            table.insert(existing.downgrades, deb)
+                        end
                     else
                         t[#t + 1] = deb
                         map[deb.Package] = #t
