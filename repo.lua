@@ -16,6 +16,9 @@ weird['http://apt.saurik.com/'] = {
 
 function Repo:new(url)
     local self = super.new(self)
+
+    self.orig_url = url
+
     if not(string.sub(url, #url, #url) == '/') then
         url = url..'/'
     end

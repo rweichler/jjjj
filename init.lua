@@ -6,6 +6,7 @@ package.path = PATH..'/?.lua;'..
                package.path
 
 pcall(require, 'autorun')
+pcall(require, 'config.repos')
 require 'constants'
 config = require 'config'
 ffi = require 'ffi'

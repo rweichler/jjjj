@@ -2,6 +2,18 @@ local function PUSHCONTROLLER(f, title)
     REPOCONTROLLER:pushViewController_animated(VIEWCONTROLLER(f, title), true)
 end
 
+local function update_repos()
+    os.setuid('mkdir -p '..PATH..'/config')
+    os.setuid('chown -R mobile '..PATH..'/config')
+    local f = io.open(PATH..'/config/repos.lua', 'w')
+    f:write('REPOS = {\n')
+    for i=1,#REPOS do
+        f:write('    "'..REPOS[i]..'",\n')
+    end
+    f:write('}\n')
+    f:close()
+end
+
 _G.REPOCONTROLLER = objc.UINavigationController:alloc():initWithRootViewController(VIEWCONTROLLER(function(m)
     m:view():setBackgroundColor(objc.UIColor:whiteColor())
     local tbl = ui.filtertable:new()
@@ -50,8 +62,9 @@ _G.REPOCONTROLLER = objc.UINavigationController:alloc():initWithRootViewControll
                 end
             end
             for i=1,#REPOS do
-                if REPOS[i] == repo then
+                if REPOS[i] == repo.orig_url then
                     table.remove(REPOS, i)
+                    update_repos()
                     break
                 end
             end
