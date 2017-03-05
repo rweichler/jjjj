@@ -18,14 +18,47 @@ _G.REPOCONTROLLER = objc.UINavigationController:alloc():initWithRootViewControll
     m:view():setBackgroundColor(objc.UIColor:whiteColor())
     local tbl = ui.filtertable:new()
 
-
     tbl.items = {{'Loading...'}}
     tbl.cell = ui.cell:new()
     tbl:refresh()
     tbl.m:setFrame(m:view():bounds())
     m:view():addSubview(tbl.m)
 
+    local function loadrepo(repo)
+        local function callback()
+            for i,v in ipairs(tbl:list()) do
+                if v == repo then
+                    local rows = objc.toobj{objc.NSIndexPath:indexPathForRow_inSection(i - 1, 0)}
+                    tbl.m:reloadRowsAtIndexPaths_withRowAnimation(rows, UITableViewRowAnimationNone)
+                    break
+                end
+            end
+        end
+        repo:getrelease(callback)
+        repo:geticon(callback)
+    end
+
     Repo.List(function(repos)
+
+
+        local target = ns.target:new()
+        local button = objc.UIBarButtonItem:alloc():initWithTitle_style_target_action('Add repo', UIBarButtonItemStylePlain, target.m, target.sel)
+        m:navigationItem():setRightBarButtonItem(button)
+
+        function target.onaction()
+            C.alert_input('Add repo', 'Please type the URL', 'Cancel', 'Add repo', function(text)
+                local url = ffi.string(text)
+                local repo = Repo:new(url)
+                repo.can_delete = true
+                table.insert(tbl.deblist, 1, repo)
+                tbl:updatefilter()
+                tbl:refresh(true)
+                loadrepo(repo)
+                REPOS[#REPOS + 1] = url
+                update_repos()
+            end)
+        end
+
         for _,url in ipairs(REPOS or {}) do
             local repo = Repo:new(url)
             repo.can_delete = true
@@ -82,17 +115,7 @@ _G.REPOCONTROLLER = objc.UINavigationController:alloc():initWithRootViewControll
         end
 
         for i, repo in ipairs(repos) do
-            local function callback()
-                for i,v in ipairs(tbl:list()) do
-                    if v == repo then
-                        local rows = objc.toobj{objc.NSIndexPath:indexPathForRow_inSection(i - 1, 0)}
-                        tbl.m:reloadRowsAtIndexPaths_withRowAnimation(rows, UITableViewRowAnimationNone)
-                        break
-                    end
-                end
-            end
-            repo:getrelease(callback)
-            repo:geticon(callback)
+            loadrepo(repo)
         end
         --tbl.items = {repos}
         tbl.deblist = repos

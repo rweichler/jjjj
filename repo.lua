@@ -14,6 +14,10 @@ weird['http://apt.saurik.com/'] = {
     release = 'dists/ios/1348.22/',
 }
 
+local function hasprefix(str, prefix)
+    return string.sub(str, 1, #prefix) == prefix
+end
+
 function Repo:new(url)
     local self = super.new(self)
 
@@ -21,6 +25,10 @@ function Repo:new(url)
 
     if not(string.sub(url, #url, #url) == '/') then
         url = url..'/'
+    end
+
+    if not hasprefix(url, 'http://') or hasprefix(url, 'https://') then
+        url = 'http://'..url
     end
 
     self.url = url
