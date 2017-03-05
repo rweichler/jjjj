@@ -15,6 +15,13 @@ end
 function ui.table:init()
 end
 
+function ui.table:caneditcell(section, row)
+    return false
+end
+
+function ui.table:editcell(section, row, style)
+end
+
 function ui.table:getmcell(section, row)
     local indexPath = objc.NSIndexPath:indexPathForRow_inSection(row-1, section-1)
     return self.m:cellForRowAtIndexPath(indexPath) or error 'wtf'
@@ -96,5 +103,23 @@ function class:tableView_willDisplayCell_forRowAtIndexPath(tableView, mcell, ind
     local cell = this:getcell(section, row)
     cell:onshow(mcell, section, row)
 end
+
+function class:tableView_canEditRowAtIndexPath(tableView, indexPath)
+    local this = objc.Lua(self)
+    local section, row = tonumber(indexPath:section()) + 1, tonumber(indexPath:row()) + 1
+
+    if this:caneditcell(section, row) then
+        return true
+    else
+        return false
+    end
+end
+
+objc.addmethod(class, 'tableView:commitEditingStyle:forRowAtIndexPath:', function(self, tableView, style, indexPath)
+    local this = objc.Lua(self)
+    local section, row = tonumber(indexPath:section()) + 1, tonumber(indexPath:row()) + 1
+
+    this:editcell(section, row, style)
+end, ffi.arch == 'arm64' and 'v40@0:8@16q24@32' or 'v20@0:4@8i12@16')
 
 return ui.table

@@ -15,7 +15,9 @@ _G.REPOCONTROLLER = objc.UINavigationController:alloc():initWithRootViewControll
 
     Repo.List(function(repos)
         for _,url in ipairs(REPOS or {}) do
-            table.insert(repos, 1, Repo:new(url))
+            local repo = Repo:new(url)
+            repo.can_delete = true
+            table.insert(repos, 1, repo)
         end
         function tbl:search(text, item)
             local function find(s)
@@ -26,6 +28,44 @@ _G.REPOCONTROLLER = objc.UINavigationController:alloc():initWithRootViewControll
                 return s and string.find(string.lower(s), string.lower(text))
             end
             return find(item.Origin) or find(item.Title) or find(item.prettyurl)
+        end
+
+        function tbl:caneditcell(section, row)
+            local repo = self:list()[row]
+            return repo.can_delete
+        end
+
+        function tbl:editcell(section, row, style)
+            if not(style == UITableViewCellEditingStyleDelete) then return end
+
+            local repo = self:list()[row]
+            local list = self:list()
+
+            if not(list == self.deblist) then
+                for i=1,#self.deblist do
+                    if self.deblist[i] == repo then
+                        table.remove(self.deblist, i)
+                        break
+                    end
+                end
+            end
+            for i=1,#REPOS do
+                if REPOS[i] == repo then
+                    table.remove(REPOS, i)
+                    break
+                end
+            end
+            local listi
+            for i=1,#list do
+                if list[i] == repo then
+                    table.remove(list, i)
+                    listi = i
+                    break
+                end
+            end
+
+            local rows = objc.toobj{objc.NSIndexPath:indexPathForRow_inSection(listi - 1, 0)}
+            self.m:deleteRowsAtIndexPaths_withRowAnimation(rows, UITableViewRowAnimationFade)
         end
 
         for i, repo in ipairs(repos) do

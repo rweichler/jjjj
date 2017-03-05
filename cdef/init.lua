@@ -42,13 +42,18 @@ CFNotificationCenterRef CFNotificationCenterGetDarwinNotifyCenter(void);
 id UIKeyboardWillChangeFrameNotification;
 id UIKeyboardFrameEndUserInfoKey;
 ]]
-UITableViewRowAnimationFade     = 0
-UITableViewRowAnimationRight    = 1
-UITableViewRowAnimationLeft     = 2
-UITableViewRowAnimationTop      = 3
-UITableViewRowAnimationBottom   = 4
-UITableViewRowAnimationNone     = 5
-UITableViewRowAnimationMiddle   = 6
+
+UITableViewCellEditingStyleNone     = 0
+UITableViewCellEditingStyleDelete   = 1
+UITableViewCellEditingStyleInsert   = 2
+
+UITableViewRowAnimationFade      = 0
+UITableViewRowAnimationRight     = 1
+UITableViewRowAnimationLeft      = 2
+UITableViewRowAnimationTop       = 3
+UITableViewRowAnimationBottom    = 4
+UITableViewRowAnimationNone      = 5
+UITableViewRowAnimationMiddle    = 6
 UITableViewRowAnimationAutomatic = 100
 
 NSUTF8StringEncoding = 4
