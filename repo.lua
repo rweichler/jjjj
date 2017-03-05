@@ -27,7 +27,7 @@ function Repo:new(url)
         url = url..'/'
     end
 
-    if not hasprefix(url, 'http://') or hasprefix(url, 'https://') then
+    if not hasprefix(url, 'http://') or not hasprefix(url, 'https://') then
         url = 'http://'..url
     end
 
