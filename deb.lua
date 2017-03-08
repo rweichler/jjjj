@@ -6,12 +6,19 @@ function Deb:newfromurl(url, oncomplete, onprogress)
     local dl = ns.http:new()
     dl.download = true
     dl.url = url
+    print('Deb:newfromurl("'..url..'")')
+    dl.requestheaders = {
+        ['User-Agent'] = 'Telesphoreo APT-HTTP/1.0.592',
+        ['X-Firmware'] = '10.2',
+        ['X-Unique-ID'] = 'a253b3a7b970ec38008f04b9cd63be9a2b941c45',
+    }
     function dl.handler(dl, path, percent, errcode)
         if errcode then
             oncomplete(errcode)
         elseif path then
-            self:init(path)
-            oncomplete()
+            if self:init(path) then
+                oncomplete()
+            end
         elseif percent then
             if onprogress then
                 onprogress(percent)
@@ -98,18 +105,17 @@ function Deb:init(path)
     local function die(reason)
         C.alert_display('Failed getting deb info', reason, 'Dismiss', nil, nil)
         cleanup()
+        return false
     end
 
     cleanup()
     local result, status = os.setuid('dpkg-deb --control '..path..' '..control_dir)
     if not(status == 0) then
-        die(result)
-        return false
+        return die(result)
     end
     local f = io.open(control_dir..'/control', 'r')
     if not f then
-        die('No control file')
-        return false
+        return die('No control file')
     end
     for line in f:lines() do
         local k, v = Deb.ParseLine(line)
@@ -120,8 +126,7 @@ function Deb:init(path)
     f:close()
 
     if not self.Package then
-        die('Malformed control file')
-        return false
+        return die('Malformed control file')
     end
 
     local newpath = CACHE_DIR..'/'..self.Package..'.deb'

@@ -16,9 +16,10 @@ function ns.http:start()
     request:setValue_forHTTPHeaderField('Cydia/0.9 CFNetwork/808.2.16 Darwin/16.3.0', 'User-Agent')
     request:setValue_forHTTPHeaderField('iPhone6,1', 'X-Machine')
     request:setValue_forHTTPHeaderField('a253b3a7b970ec38008f04b9cd63be9a2b941c45', 'X-Unique-ID')
-    if self.getheaders then
-        request:setHTTPMethod('HEAD')
+    for k,v in pairs(self.requestheaders or {}) do
+        request:setValue_forHTTPHeaderField(v, k)
     end
+    request:setHTTPMethod(self.method or 'GET')
 
     if not objc.NSURLSession then
         -- iOS 6- fallback
@@ -77,7 +78,7 @@ objc.addmethod(class, 'connection:didReceiveResponse:', function(self, connectio
     this.status = tonumber(response:statusCode())
     this:parseheaders(objc.tolua(response:allHeaderFields()))
 
-    if this.getheaders then
+    if this.method == 'HEAD' then
         connection:cancel()
         this:handler(nil, nil, this.status)
         return

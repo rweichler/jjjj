@@ -96,7 +96,7 @@ end
 
 local function doit(self, callback, info)
     local dl = ns.http:new()
-    dl.getheaders = true
+    dl.method = 'HEAD'
     dl.url = self.url..'Packages'..info.ext
     function dl.handler(_, data, percent, errcode)
         if not dl.headers['Last-Modified'] then
