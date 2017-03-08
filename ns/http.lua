@@ -13,9 +13,6 @@ end
 function ns.http:start()
     local url = objc.NSURL:URLWithString(self.url)
     local request = objc.NSMutableURLRequest:requestWithURL(url)
-    request:setValue_forHTTPHeaderField('Cydia/0.9 CFNetwork/808.2.16 Darwin/16.3.0', 'User-Agent')
-    request:setValue_forHTTPHeaderField('iPhone6,1', 'X-Machine')
-    request:setValue_forHTTPHeaderField('a253b3a7b970ec38008f04b9cd63be9a2b941c45', 'X-Unique-ID')
     for k,v in pairs(self.requestheaders or {}) do
         request:setValue_forHTTPHeaderField(v, k)
     end
@@ -197,25 +194,35 @@ Downloadbar = Object:new(view)
 function Downloadbar:new(frame)
     local self = Object.new(self)
 
-    frame = frame or objc.UIScreen:mainScreen():bounds()
+    local textColor = objc.UIColor:whiteColor()
+
+    local w, h = SCREEN.WIDTH - 30, 80
+
+    frame = frame or CGRectMake((SCREEN.WIDTH - w)/2, (SCREEN.HEIGHT - h)/2, w, h)
 
     local view = objc.UIView:alloc():initWithFrame(frame)
+    view:setUserInteractionEnabled(false)
+    view:setBackgroundColor(objc.UIColor:colorWithWhite_alpha(0, 0.85))
+    view:layer():setCornerRadius(5)
 
     local progress = objc.UIProgressView:alloc():initWithProgressViewStyle(UIProgressViewStyleDefault)
+    progress:setProgressTintColor(objc.UIColor:whiteColor())
     progress:setProgress(0)
 
     local padding = 44
-    local y = frame.size.height/2
+    local y = frame.size.height*2/5
     progress:setFrame{{padding, y},{frame.size.width-padding*2, 22}}
 
     local downloadingLabel = objc.UILabel:alloc():initWithFrame{{padding, y + 11},{20,20}}
+    downloadingLabel:setTextColor(textColor)
     downloadingLabel:setText('Downloading...')
-    downloadingLabel:setFont(downloadingLabel:font():fontWithSize(10))
+    downloadingLabel:setFont(downloadingLabel:font():fontWithSize(12))
     downloadingLabel:sizeToFit()
 
     local percentLabel = objc.UILabel:alloc():initWithFrame{{0, y + 11},{20,20}}
+    percentLabel:setTextColor(textColor)
     percentLabel:setText('000%')
-    percentLabel:setFont(percentLabel:font():fontWithSize(10))
+    percentLabel:setFont(percentLabel:font():fontWithSize(12))
     percentLabel:sizeToFit()
     local x = progress:frame().origin.x + progress:frame().size.width - percentLabel:frame().size.width
     percentLabel:setFrame{{x, percentLabel:frame().origin.y},percentLabel:frame().size}

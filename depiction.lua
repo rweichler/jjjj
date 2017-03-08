@@ -50,8 +50,15 @@ function Depiction:ondownloadcomplete()
     local m = self.m
     self.m = nil
 
-    self.downloadbar.m:removeFromSuperview()
+    local downloadbar = self.downloadbar
     self.downloadbar = nil
+    ANIMATE(0.8, function(finished)
+        if finished == nil then
+            downloadbar.m:setAlpha(0)
+        else
+            downloadbar.m:removeFromSuperview()
+        end
+    end)
 
     local namelabel = objc.UILabel:alloc():init()
     namelabel:setFrame{{0, NAVHEIGHT()},{60,44}}
@@ -75,11 +82,13 @@ function Depiction:view(m)
     m:view():setBackgroundColor(objc.UIColor:whiteColor())
 
     local url = self.deb.Depiction or 'http://cydia.saurik.com/package/'..self.deb.Package
-    local webview = objc.UIWebView:alloc():initWithFrame(m:view():bounds())
+    if not self.webview then
+        self.webview = objc.UIWebView:alloc():initWithFrame(m:view():bounds())
+        m:view():addSubview(self.webview)
+    end
     local request = objc.NSURLRequest:requestWithURL(objc.NSURL:URLWithString(url))
-    webview:loadRequest(request)
+    self.webview:loadRequest(request)
 
-    m:view():addSubview(webview)
 
     local label = objc.UILabel:alloc():init()
     label:setFont(objc.UIFont:fontWithName_size('Courier', 12))

@@ -53,6 +53,7 @@ end
 
 function Repo:getrelease(callback)
     local dl = ns.http:new()
+    dl.requestheaders = Repo.CydiaHeaders()
     dl.url = (self.releaseurl or self.url)..'Release'
     function dl.handler(dl, data, percent, errcode)
         if errcode then
@@ -97,6 +98,7 @@ end
 local function doit(self, callback, info)
     local dl = ns.http:new()
     dl.method = 'HEAD'
+    dl.requestheaders = Repo.CydiaHeaders()
     dl.url = self.url..'Packages'..info.ext
     function dl.handler(_, data, percent, errcode)
         if not dl.headers['Last-Modified'] then
@@ -127,6 +129,7 @@ function Repo:getpackages(callback, ext)
     ext = ext or '.bz2'
     local dl = ns.http:new()
     dl.url = (self.packagesurl or self.url)..'Packages'..ext
+    dl.requestheaders = Repo.CydiaHeaders()
     dl.download = true
     function dl.handler(_, path, percent, errcode)
         print('dl handler??')
@@ -192,6 +195,7 @@ end
 
 function Repo:geticon(callback)
     local dl = ns.http:new()
+    dl.requestheaders = Repo.CydiaHeaders()
     dl.url = (self.releaseurl or self.url)..'CydiaIcon.png'
     function dl.handler(dl, data, percent, errcode)
         if data then
@@ -200,6 +204,14 @@ function Repo:geticon(callback)
         end
     end
     dl:start()
+end
+
+function Repo.CydiaHeaders()
+    return {
+        ['User-Agent'] = 'Telesphoreo APT-HTTP/1.0.592',
+        ['X-Firmware'] = '10.2',
+        ['X-Unique-ID'] = 'a253b3a7b970ec38008f04b9cd63be9a2b941c45',
+    }
 end
 
 function Repo.List(oncomplete)

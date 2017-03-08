@@ -7,11 +7,7 @@ function Deb:newfromurl(url, oncomplete, onprogress)
     dl.download = true
     dl.url = url
     print('Deb:newfromurl("'..url..'")')
-    dl.requestheaders = {
-        ['User-Agent'] = 'Telesphoreo APT-HTTP/1.0.592',
-        ['X-Firmware'] = '10.2',
-        ['X-Unique-ID'] = 'a253b3a7b970ec38008f04b9cd63be9a2b941c45',
-    }
+    dl.requestheaders = Repo.CydiaHeaders()
     function dl.handler(dl, path, percent, errcode)
         if errcode then
             oncomplete(errcode)
