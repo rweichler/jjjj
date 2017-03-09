@@ -206,6 +206,7 @@ function Downloadbar:new(frame)
     view:layer():setCornerRadius(5)
 
     local progress = objc.UIProgressView:alloc():initWithProgressViewStyle(UIProgressViewStyleDefault)
+    progress:setTrackTintColor(objc.UIColor:colorWithWhite_alpha(1, 0.3))
     progress:setProgressTintColor(objc.UIColor:whiteColor())
     progress:setProgress(0)
 
