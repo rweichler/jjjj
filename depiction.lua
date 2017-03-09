@@ -16,18 +16,20 @@ end
 
 function Depiction:startdownload(url)
     print('Downloading from '..url)
+    local updateprogress = function(percent)
+        local dl = self.downloadbar
+        dl.progress:setProgress(percent)
+        dl.percent:setText(math.floor(percent*100 + 0.5)..'%')
+    end
     self.deb = Deb:newfromurl(url, function(errcode)
         if errcode then
             C.alert_display('Could not download deb', 'Got '..errcode.. ' HTTP error', 'Dismiss', nil, nil)
             POPCONTROLLER()
         else
+            updateprogress(1)
             self:ondownloadcomplete()
         end
-    end, function(percent)
-        local dl = self.downloadbar
-        dl.progress:setProgress(percent)
-        dl.percent:setText(math.floor(percent*100 + 0.5)..'%')
-    end)
+    end, updateprogress)
 end
 
 function Depiction:gettitle()
