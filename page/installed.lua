@@ -2,6 +2,8 @@ local tbl = ui.filtertable:new()
 tbl.items = {}
 tbl.deblist = Deb.List()
 
+tbl.searchbar.m:setPlaceholder('Filter packages')
+
 function tbl:search(text, item)
     local function find(s)
         if s then

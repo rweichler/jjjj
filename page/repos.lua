@@ -18,6 +18,8 @@ _G.REPOCONTROLLER = objc.UINavigationController:alloc():initWithRootViewControll
     m:view():setBackgroundColor(objc.UIColor:whiteColor())
     local tbl = ui.filtertable:new()
 
+    tbl.searchbar.m:setPlaceholder('Filter repos')
+
     tbl.items = {{'Loading...'}}
     tbl.cell = ui.cell:new()
     tbl:refresh()
@@ -127,6 +129,7 @@ _G.REPOCONTROLLER = objc.UINavigationController:alloc():initWithRootViewControll
         function tbl.cell.onselect(_, section, row)
             local repo = tbl:list()[row]
             local tbl = ui.filtertable:new()
+            tbl.searchbar.m:setPlaceholder('Filter packages')
             tbl.items = {{'Loading...'}}
             tbl.cell = ui.cell:new()
             tbl:refresh()
