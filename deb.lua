@@ -166,10 +166,13 @@ function Deb.List(path)
 
     local filter = path and function(deb) return deb end or function(deb)
         local x = deb.Status
-        local y = 'ok installed'
-        if x and string.sub(x, #x - #y + 1, #x) == y then
-            deb.installed = true
-            return deb
+        if x then
+            for _, y in ipairs{'ok installed', 'ok unpacked'} do
+                if string.sub(x, #x - #y + 1, #x) == y then
+                    deb.installed = true
+                    return deb
+                end
+            end
         end
     end
 

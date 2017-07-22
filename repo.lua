@@ -206,11 +206,13 @@ function Repo:geticon(callback)
     dl:start()
 end
 
+
+local udid = objc.tolua(C.MGCopyAnswer(objc.toobj("UniqueDeviceID")))
 function Repo.CydiaHeaders()
     return {
         ['User-Agent'] = 'Telesphoreo APT-HTTP/1.0.592',
         ['X-Firmware'] = '10.2',
-        ['X-Unique-ID'] = 'a253b3a7b970ec38008f04b9cd63be9a2b941c45',
+        ['X-Unique-ID'] = udid,
     }
 end
 

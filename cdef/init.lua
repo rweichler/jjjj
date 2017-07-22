@@ -5,6 +5,9 @@ else
 end
 
 ffi.cdef[[
+id MGCopyAnswer(id);
+void CFRelease(void *);
+
 struct UIEdgeInsets {
     CGFloat top, left, bottom, right;
 };
