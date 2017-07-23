@@ -208,10 +208,11 @@ end
 
 
 local udid = objc.tolua(C.MGCopyAnswer(objc.toobj("UniqueDeviceID")))
+local version = objc.tolua(objc.UIDevice:currentDevice():systemVersion())
 function Repo.CydiaHeaders()
     return {
         ['User-Agent'] = 'Telesphoreo APT-HTTP/1.0.592',
-        ['X-Firmware'] = '10.2',
+        ['X-Firmware'] = version,
         ['X-Unique-ID'] = udid,
     }
 end
