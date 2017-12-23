@@ -3,7 +3,6 @@ _G.TABCONTROLLERS = {}
 
 require 'page.repos'
 require 'page.installed'
-require 'page.browse'
 
 _G.TABBARCONTROLLER = objc.UITabBarController:alloc():init()
 TABBARCONTROLLER:setViewControllers(TABCONTROLLERS)
